@@ -12,7 +12,7 @@ import { connect } from 'react-redux';
 import CircularButton from '../../components/CircularButton';
 import Modal from './Modal';
 
-import { COLOR_GREEN, COLOR_RED, COLOR_DARK_GREY } from '../../constants/color';
+import { COLOR_GREEN, COLOR_RED, COLOR_BLUE } from '../../constants/color';
 const styles = StyleSheet.create({
 	map: {
 		...StyleSheet.absoluteFill
@@ -27,10 +27,11 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 	title: {
+		fontFamily: 'open-sans',
 		position: 'absolute',
 		top: 30,
 		left: 70,
-		backgroundColor: COLOR_DARK_GREY,
+		backgroundColor: COLOR_BLUE,
 		padding: 12,
 		right: 70,
 		borderRadius: 100,
@@ -43,23 +44,7 @@ const styles = StyleSheet.create({
 	}
 })
 
-const coordinate = [{
-	id: 'm',
-	route: [
-		{ latitude: 23.18853, longitude: 72.63006 },
-		{ latitude: 23.18551, longitude: 72.62957 },
-		{ latitude: 23.18575, longitude: 72.63847 },
-		{ latitude: 23.13386, longitude: 72.63277 },
-		{ latitude: 23.09818, longitude: 72.58844 }
-	],
-	stops: [
-		{ latitude: 23.18853, longitude: 72.63006 },
-		{ latitude: 23.18551, longitude: 72.62957 },
-		{ latitude: 23.18575, longitude: 72.63847 },
-		{ latitude: 23.13386, longitude: 72.63277 },
-		{ latitude: 23.09818, longitude: 72.58844 }
-	],
-}]
+
 
 const SELECTION = {
 	ROUTE: 'ROUTE',
@@ -73,7 +58,10 @@ class MapView extends React.Component {
 		this.state = {
 			routes: null,
 			stops: [],
-			selection: SELECTION.ROUTE
+			selection: SELECTION.ROUTE,
+			pickup: {},
+			drop: {},
+			billAmount: 120
 		}
 		this.modal = React.createRef();
 	}
@@ -102,18 +90,25 @@ class MapView extends React.Component {
 	}
 
 	navigatePaymentGateway = () => {
-		const { navigation } = this.props;
-		navigation.navigate('PaymentView');
+		const { pickup, drop, routes, billAmount } = this.state;
+		const { navigation, userId } = this.props;
+		navigation.navigate('PaymentView', {ticket: {
+			from: pickup.name,
+			to: drop.name,
+			userId,
+			routeId: routes && routes[0]._id,
+			billAmount: 1,
+			valid: true
+		}});
 		this.modal.current.close()
 	}
 
 	onBackPress = () => {
-		const { selection } =this.state;
-		if(selection ===  SELECTION.PICKUP){
+		const { selection } = this.state;
+		if (selection === SELECTION.PICKUP) {
 			this.restoreInitial();
-		} else if ( selection === SELECTION.DROP){
-			this.setState({selection: SELECTION.PICKUP});
-			this.pickup = null;
+		} else if (selection === SELECTION.DROP) {
+			this.setState({ selection: SELECTION.PICKUP, pickup: {}});
 		}
 	}
 
@@ -122,9 +117,9 @@ class MapView extends React.Component {
 			routes: null,
 			stops: [],
 			selection: SELECTION.ROUTE,
+			pickup: {},
+			drop: {}
 		})
-		this.pickup = null,
-		this.drop = null
 	}
 
 	openModal = () => {
@@ -135,37 +130,47 @@ class MapView extends React.Component {
 		}
 	};
 
-	onMarkerPress = ({ coordinate }) => {
+	onMarkerPress = (coordinate, name) => {
 		const { selection } = this.state;
-		if(selection===SELECTION.PICKUP) {
-			this.pickup = coordinate;
+		if (selection === SELECTION.PICKUP) {
+			this.setState({
+				pickup: {
+					coordinate,
+					name
+				}
+			});
 			return this.setState({
 				selection: SELECTION.DROP
 			});
 		}
-		this.drop = coordinate;
+		this.setState({
+			drop: {
+				coordinate, name
+			}
+		});
 		this.openModal();
 	}
 
 
 	renderRoutes = () => {
 		let { routes } = this.state;
-		if(!routes) {
+		if (!routes) {
 			routes = this.props.routes;
 		}
 		return (
 			routes.map((item) => {
-			const { route } = item;
-			return(
-				<Polyline
-					key={item._id}
-					coordinates={route.path}
-					strokeColor={COLOR_GREEN}
-					strokeWidth={6}
-					tappable={true}
-					onPress={() => this.handlePathTouch(item)}
-				/>
-			)})
+				const { route } = item;
+				return (
+					<Polyline
+						key={item._id}
+						coordinates={route.path}
+						strokeColor={COLOR_GREEN}
+						strokeWidth={6}
+						tappable={true}
+						onPress={() => this.handlePathTouch(item)}
+					/>
+				)
+			})
 		)
 	}
 
@@ -178,20 +183,28 @@ class MapView extends React.Component {
 					key={key}
 					coordinate={item.coordinate}
 					title={item.name}
-					onPress={this.onMarkerPress}
-				></Marker>
+					onPress={({ coordinate }) => this.onMarkerPress(coordinate, item.name)}
+				>
+					<MaterialCommunityIcons color={COLOR_RED} size={20} name='map-marker' />
+				</Marker>
 			)))
 	}
 
 	renderModalContent = () => {
-		return(
-			<Modal onPress={this.navigatePaymentGateway}/>
+		const { pickup, drop, billAmount } = this.state;
+		return (
+			<Modal 
+				onPress={this.navigatePaymentGateway}
+				pickup={pickup}
+				drop={drop}
+				billAmount={billAmount}
+			/>
 		)
 	}
 
 	renderOptions = () => {
 		const { selection } = this.state;
-		if(selection === SELECTION.ROUTE)
+		if (selection === SELECTION.ROUTE)
 			return null;
 		return (
 			<CircularButton
@@ -205,11 +218,14 @@ class MapView extends React.Component {
 
 	renderTitle = () => {
 		const { selection } = this.state;
-		return(
+		if(selection===SELECTION.ROUTE){
+			return null;
+		}
+		return (
 			<Text
 				style={styles.title}
 			>
-				{selection === SELECTION.PICKUP ? 'Please Select Your PickUp location' :  'Please Select Your Drop location' }
+				{selection === SELECTION.PICKUP ? 'Please Select Your PickUp location' : 'Please Select Your Drop location'}
 			</Text>)
 	}
 
@@ -238,7 +254,7 @@ class MapView extends React.Component {
 				>
 					{this.renderModalContent()}
 				</Modalize>
-				
+
 			</React.Fragment>
 		);
 	}
@@ -246,7 +262,8 @@ class MapView extends React.Component {
 
 const mapStateToProps = (state) => {
 	return {
-		routes: state.routes
+		userId: state.auth && state.auth.user && state.auth.user._id,
+		routes: state.routes || []
 	}
 }
 

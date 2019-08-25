@@ -6,6 +6,7 @@ import {
 	MaterialCommunityIcons
 } from '@expo/vector-icons';
 import {Provider}  from 'react-redux';
+import * as Font from 'expo-font';
 
 import store from './lib/createStore';
 import Navigation from './lib/Navigation';
@@ -13,7 +14,6 @@ import init from '../App/actions/init';
 
 import MapView from './views/MapView';
 import StreakView from './views/StreakView';
-import SettingsView from './views/SettingsView';
 import SignInView from './views/SignInView';
 import TicketRecordView from './views/TicketRecordView';
 import GlobalLeaderBoardView from './views/GlobalLeaderBoardView';
@@ -23,7 +23,9 @@ import PaymentView from './views/PaymentView';
 import TicketBookedView from './views/TicketBookedView';
 import { COLOR_GREEN } from './constants/color';
 import AppLoadingView from './views/AppLoadingView';
+import QRView from './views/QRView';
 
+import { COLOR_BLUE } from './constants/color'
 const LeaderBoardStack = createMaterialTopTabNavigator({
 	Global: GlobalLeaderBoardView,
 	Local: LocalLeaderBoardView
@@ -42,7 +44,7 @@ const LeaderBoardStack = createMaterialTopTabNavigator({
 			}
 		}),
 		tabBarOptions: {
-			activeTintColor: 'tomato',
+			activeTintColor: COLOR_BLUE,
 			inactiveTintColor: 'gray',
 			showIcon: true,
 			tabStyle: {
@@ -70,7 +72,10 @@ const StreakStack = createStackNavigator({
 	LeaderBoard: {
 		screen:	LeaderBoardStack,
 		navigationOptions: () => ({
-			title: 'Leader Board'
+			title: 'Leader Board',
+			headerTitleStyle: {
+				fontFamily: 'open-sans'
+			}
 		})
 	}
 }, {
@@ -99,7 +104,10 @@ const BookingStack = createStackNavigator({
 	PaymentView: {
 		screen: PaymentView,
 		navigationOptions: () => ({
-			title: 'Select Payment Options'
+			title: 'Select Payment Options',
+			headerTitleStyle: {
+				fontFamily: 'open-sans'
+			}
 		})
 	},
 	TicketBookedView: {
@@ -108,18 +116,39 @@ const BookingStack = createStackNavigator({
 			headerLeft: () => (
 				<Entypo 
 					name='cross'
-					size={30}
+					size={40}
+					style={{marginLeft: 10}}
 					color={COLOR_GREEN}
 					onPress={()=> navigation.navigate('MapView')}
 				/>)
 		})
 	}
 })
+
+const BookedRecordStack =  createStackNavigator({
+	TicketRecordView: {
+		screen: TicketRecordView,
+		navigationOptions: () => ({
+			title: 'Booked History',
+			headerTitleStyle: {
+				fontFamily: 'open-sans'
+			}
+		})
+	},
+	QRView: {
+		screen: QRView,
+		navigationOptions: () => ({
+			title: 'SCAN',
+			headerTitleStyle: {
+				fontFamily: 'open-sans'
+			}
+		})
+	}
+})
 const AppStack = createBottomTabNavigator({
 	Map: BookingStack,
-	Ticket: TicketRecordView,
+	Ticket: BookedRecordStack,
 	Streak: StreakStack,
-	Settings: SettingsView
 }, {
 		defaultNavigationOptions: ({ navigation }) => ({
 			tabBarIcon: ({ focused, horizontal, tintColor }) => {
@@ -128,8 +157,6 @@ const AppStack = createBottomTabNavigator({
 				if (routeName === 'Map') {
 					Icon = <FontAwesome name='map-marker' size={25} color={tintColor} />;
 
-				} else if (routeName === 'Settings') {
-					Icon = <Ionicons name='ios-settings' size={25} color={tintColor} />;
 				} else if (routeName === 'Streak') {
 					Icon = <MaterialCommunityIcons name='star-box-outline' size={25} color={tintColor} />;
 				} else if (routeName === 'Ticket') {
@@ -139,9 +166,12 @@ const AppStack = createBottomTabNavigator({
 			},
 		}),
 		tabBarOptions: {
-			activeTintColor: 'tomato',
+			activeTintColor: COLOR_BLUE,
 			inactiveTintColor: 'gray',
-			showIcon: true
+			showIcon: true,
+			labelStyle: {
+				fontFamily: 'open-sans'
+			}
 		},
 	});
 
@@ -155,7 +185,10 @@ const AuthStack = createStackNavigator({
 	SignUpView: {
 		screen: SignUpView,
 		navigationOptions: () => ({
-			title: 'Sign Up'
+			title: 'Sign Up',
+			headerTitleStyle: {
+				fontFamily: 'open-sans'
+			}
 		})
 	}
 })
@@ -176,7 +209,11 @@ export default class Root extends React.Component {
 		super(props);
 		this.init();
 	}
-	init = () => {
+	init = async() => {
+		await Font.loadAsync({
+			Montserrat: require('./statics/Montserrat-Regular.ttf'),
+			'open-sans': require('./statics/OpenSans.ttf')
+		  });
 		store.dispatch(init())
 	}
 

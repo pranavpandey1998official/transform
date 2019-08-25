@@ -6,7 +6,7 @@ const initialState ={
     error: null
 };
 
-export default function login(state = initialState, action) {
+export default function auth(state = initialState, action) {
     switch (action.type) {
         case AUTH.LOGOUT:
             return initialState;
@@ -14,7 +14,9 @@ export default function login(state = initialState, action) {
             return {
                 ...state,
                 isAuthenticated: true,
-                user: action.user,
+                user: {
+                    ...action.user
+                },
                 error: null   
             }
         case AUTH.ERROR:

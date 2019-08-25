@@ -3,7 +3,7 @@ import { URL } from '../constants/api';
 
 const getUserToken = () => {
     const state = store.getState();
-    return state.auth.user.token;
+    return state.auth.user && state.auth.user.token;
 }
 
 export const POST = async(path, body) => {

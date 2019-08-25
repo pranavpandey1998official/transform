@@ -6,42 +6,42 @@ export const globalLeaderBoard = [
     },
     {
         key: '2',
-        name: 'Pranav Pandey',
+        name: 'Arpit Chaudhari',
         streak: 10
     },
     {
         key: '3',
-        name: 'Pranav Pandey',
+        name: 'Tikam alma',
         streak: 100
     },
     {
         key: '4',
-        name: 'Pranav Pandey',
+        name: 'Abhishek Bhowmik',
         streak: 101
     },
     {
         key: '5',
-        name: 'Pranav Pandey',
+        name: 'Heli patel',
         streak: 1000
     },
     {
         key: '6',
-        name: 'Pranav Pandey',
+        name: 'Smith',
         streak: 1
     },
     {
         key: '8',
-        name: 'Pranav Pandey',
+        name: 'Arjun Pandey',
         streak: 0
     },
     {
         key: '7',
-        name: 'Pranav Pandey',
+        name: 'Sam ',
         streak: 10
     },
     {
         key: '9',
-        name: 'Pranav Pandey',
+        name: 'Smith Dubey',
         streak: 10
     },
 

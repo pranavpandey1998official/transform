@@ -4,6 +4,7 @@ import { AUTH } from './actionTypes';
 import Navigation from '../lib/Navigation';
 import {URL} from '../constants/api';
 import { getRoutes } from './routes';
+import { getBookedTickets } from '../actions/bookedTickets';
 
 
 export function loginRequest(params) {
@@ -27,6 +28,7 @@ export function loginRequest(params) {
                 await AsyncStorage.setItem('token', user.token);
                 await dispatch(login(user));
                 await dispatch(getRoutes());
+                await dispatch(getBookedTickets());
                 await Navigation.navigate('App');
                 return;
             }

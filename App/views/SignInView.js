@@ -21,10 +21,10 @@ const styles = StyleSheet.create({
 		paddingVertical: 5,
 	},
 	heading: {
-		fontFamily: 'Roboto'
+		//fontFamily: 'Roboto'
 	},
 	label: {
-		fontFamily: 'Roboto',
+		//fontFamily: 'Roboto',
 		color: 'black',
 		fontSize: 20,
 		fontWeight: '300'
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
 	},
 	heading: {
 		fontSize: 50,
-		fontFamily: 'Roboto',
+		//fontFamily: 'Roboto',
 		fontWeight: '500',
 		marginHorizontal: 8,
 		marginVertical: 10
@@ -116,8 +116,8 @@ class SignInView extends React.Component {
 					<Divider style={styles.divider} />
 				</View>
 				<Input
-					placeholder='Phone Number'
-					label='Phone Number'
+					placeholder='Email'
+					label='Email'
 					labelStyle={styles.label}
 					inputContainerStyle={styles.input}
 					leftIconContainerStyle={styles.icon}
@@ -130,6 +130,7 @@ class SignInView extends React.Component {
 					labelStyle={styles.label}
 					inputContainerStyle={styles.input}
 					onChangeText={this.handlePassChange}
+					secureTextEntry={true}
 				/>
 				<Button
 					title="Login"

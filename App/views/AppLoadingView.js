@@ -1,7 +1,6 @@
 import React from 'react';
-import { Button, Text, View } from 'react-native';
+import { Button, Text, View, Image } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-
 export default class TicketView extends React.Component {
 
 	renderItem = () => {
@@ -10,10 +9,7 @@ export default class TicketView extends React.Component {
 	render() {
 		return (
 			<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-				<Text>TicektView</Text>
-				<QRCode
-					value="http://awesome.link.qr"
-				/>
+				<Image style={{maxHeight: 200, maxWidth: 200 }} source={require('../statics/LOGO.jpeg')} />
 			</View>
 		);
 	}

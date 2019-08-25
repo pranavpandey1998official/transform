@@ -4,10 +4,15 @@ import {
 	Ionicons, AntDesign, FontAwesome, Entypo, MaterialIcons,
 	MaterialCommunityIcons
 } from '@expo/vector-icons';
-import { COLOR_RED, COLOR_GREY, COLOR_BACKGROUNG_DISABLE } from '../constants/color'
 import { Divider } from 'react-native-elements';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+
+import { COLOR_RED, COLOR_GREY, COLOR_BACKGROUNG_DISABLE } from '../constants/color'
 import Paytm from '../statics/paytm';
+import { connect } from 'react-redux';
+import { addToBookedTickets } from '../actions/bookedTickets';
+import { POST } from '../lib/Api';
+import shareStyles from './Styles';
 
 const styles = StyleSheet.create({
     container: {
@@ -15,10 +20,12 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
     },
     payment: {
+        ...shareStyles.text,
         fontWeight: "500",
         fontSize: 25
     },
     header: {
+
         fontWeight: "500",
         fontSize: 22
     },
@@ -26,7 +33,9 @@ const styles = StyleSheet.create({
         paddingVertical: 10
     },
     subheading: {
+        ...shareStyles.text,
         fontSize: 14,
+        fontFamily: 'open-sans',
         color: COLOR_RED,
     },
     divider: {
@@ -39,16 +48,22 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     itemText: {
+        fontFamily: 'open-sans',
         paddingHorizontal: 10,
         fontWeight: "500",
         fontSize: 16
     },
-    paytm:{
+    paytm: {
         height: 30,
         width: 30
     }
 })
-export default class TicketView extends React.Component {
+class TicketView extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.ticket = props.navigation.getParam('ticket')
+    }
 
     sectionDivider = () => (
         <View style={{height: 15}}>
@@ -56,9 +71,20 @@ export default class TicketView extends React.Component {
         </View>
     )
 
-    navigateToTicketBooked = () => {
-        const { navigation } = this.props;
-        navigation.navigate('TicketBookedView');
+    navigateToTicketBooked = async(params) => {
+        const { navigation, addToBookedTickets } = this.props;
+        this.ticket = {
+            ...this.ticket,
+            ...params,
+        }
+        try {
+            const ticket = await POST('tickets',this.ticket);
+            addToBookedTickets(ticket);
+            navigation.navigate('TicketBookedView', {ticket});
+        } catch(e){
+            console.log('book_ticket', e);
+        }
+        
     }
 
 	render() {
@@ -100,7 +126,7 @@ export default class TicketView extends React.Component {
                     <Text style={styles.header}>Cash</Text>
                 </View>
                 <Divider style={styles.divider} />
-                <TouchableOpacity style={styles.item}>
+                <TouchableOpacity style={styles.item} onPress={() => this.navigateToTicketBooked({ isCash: true, paymentMode: 'Cash' })}>
                     <View style={{flexDirection: "row", alignItems: 'center'}}>
                         <MaterialCommunityIcons name='cash' size={30} />
                         <Text style={styles.itemText}>Cash on pickup</Text>
@@ -114,7 +140,7 @@ export default class TicketView extends React.Component {
                     <Text style={styles.header}>Wallet</Text>
                 </View>
                 <Divider style={styles.divider} />
-                <TouchableOpacity style={styles.item} onPress={this.navigateToTicketBooked}>
+                <TouchableOpacity style={styles.item} onPress={() => this.navigateToTicketBooked({ isCash: false, paymentMode: 'Paytm' })}>
                     <View style={{flexDirection: "row", alignItems: 'center'}}>
                         <Paytm height={40} width={50}/>
                         <Text style={styles.itemText}>Paytm</Text>
@@ -125,3 +151,11 @@ export default class TicketView extends React.Component {
 		);
 	}
 }
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        addToBookedTickets: (ticket) =>  dispatch(addToBookedTickets(ticket))
+    }
+}
+
+export default connect(null, mapDispatchToProps)(TicketView);
